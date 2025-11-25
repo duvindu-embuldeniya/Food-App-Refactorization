@@ -6,6 +6,7 @@ from rest_framework.routers import DefaultRouter
 router = DefaultRouter()
 
 router.register('recipe', RecipeViewSet)
+router.register('tags', TagViewSet)
 
 
 
