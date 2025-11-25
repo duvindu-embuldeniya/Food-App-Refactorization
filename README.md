@@ -5,8 +5,8 @@
 ## To run the application locally
 Clone the repo to your PC, then run:
 ```bash
-docker-compose -f docker-compose build
-docker-compose -f docker-compose up
+docker-compose docker-compose build
+docker-compose docker-compose up
 ```
 Open in browser:
 http://127.0.0.1:8000/
