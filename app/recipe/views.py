@@ -2,11 +2,11 @@
 from django.shortcuts import render
 from rest_framework import viewsets, mixins
 
-from core.models import Recipe, Tag
-from . serializers import RecipeSerializer, TagSerializer
+from core.models import Recipe, Tag, Ingredient
+from . serializers import RecipeSerializer, TagSerializer, IngredientSerializer
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from . permissions import UpdateOwnRecipe, UpdateOwnTag
+from . permissions import UpdateOwnRecipe, UpdateOwnTag, UpdateOwnIngredient
 
 
 
@@ -37,3 +37,11 @@ class TagViewSet(mixins.ListModelMixin, mixins.UpdateModelMixin, mixins.DestroyM
     queryset = Tag.objects.all()
     authentication_classes = [TokenAuthentication]
     permission_classes = [UpdateOwnTag, IsAuthenticated]
+
+
+
+class IngredientViewSet(mixins.ListModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    serializer_class = IngredientSerializer
+    queryset = Ingredient.objects.all()
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [UpdateOwnIngredient, IsAuthenticated]

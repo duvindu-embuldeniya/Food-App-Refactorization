@@ -1,5 +1,12 @@
-from core.models import Recipe, Tag
+from core.models import Recipe, Tag, Ingredient
 from rest_framework import serializers
+
+
+
+class IngredientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ingredient
+        fields = ['id', 'name']
 
 
 
@@ -14,10 +21,13 @@ class RecipeSerializer(serializers.ModelSerializer):
     # Make user read-only
     user = serializers.StringRelatedField(read_only=True)
     tags = TagSerializer(many=True)
+    ingredients = IngredientSerializer(many=True)
 
     class Meta:
         model = Recipe
-        fields = ['id', 'user', 'title', 'description', 'time_minutes', 'price', 'link', 'tags']
+        fields = ['id', 'user', 'title', 'description', 'time_minutes', 'price', 'link', 'tags', 'ingredients']
+
+
 
 
 
@@ -32,12 +42,29 @@ class RecipeSerializer(serializers.ModelSerializer):
     
 
 
+
+
+    def _get_or_create_ingredients(self, ingredients, recipe):
+        auth_user = self.context['request'].user
+        for ingredient in ingredients:
+            ingredient_obj, created = Ingredient.objects.get_or_create(
+                user=auth_user,
+                **ingredient,
+            )
+            recipe.ingredients.add(ingredient_obj)
+
+
+
+
+
     def create(self, validated_data):
         """Create a recipe."""
 
         tags = validated_data.pop('tags', [])
+        ingredients = validated_data.pop('ingredients', [])
         recipe = Recipe.objects.create(**validated_data)
         self._get_or_create_tags(tags, recipe)
+        self._get_or_create_ingredients(ingredients, recipe)
         return recipe
 
 
@@ -45,11 +72,15 @@ class RecipeSerializer(serializers.ModelSerializer):
         """Update recipe."""
 
         tags = validated_data.pop('tags', None)
+        ingredients = validated_data.pop('ingredients', None)
 
         if tags is not None:
             instance.tags.clear()
             self._get_or_create_tags(tags, instance)
         
+        if ingredients is not None:
+            instance.ingredients.clear()
+            self._get_or_create_ingredients(ingredients, instance)     
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
